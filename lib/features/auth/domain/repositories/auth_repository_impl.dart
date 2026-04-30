@@ -1,6 +1,6 @@
-import '../../../../features/auth/domain/repositories/auth_repository.dart';
-import '../../../../core/services/dio_client.dart';
-import '../../../../core/constants/api_constants.dart';
+import 'package:merchandise48/features/auth/domain/repositories/auth_repository.dart';
+import 'package:merchandise48/core/services/dio_client.dart';
+import 'package:merchandise48/core/constants/api_constants.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   @override

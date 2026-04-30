@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/routes/app_router.dart';
-import '../../../../core/services/secure_storage_service.dart';
+import 'package:merchandise48/core/routes/app_router.dart';
+import 'package:merchandise48/core/services/secure_storage_service.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -18,7 +18,7 @@ class _SplashPageState extends State<SplashPage> {
     _checkAuth();
   }
 
-  Future<void> _checkAuth() async {
+    Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:email_validator/email_validator.dart';
-import '../../../../../features/auth/presentation/widgets/custom_text_field.dart';
-import '../../../../../features/auth/presentation/widgets/custom_button.dart';
-import '../../../../../features/auth/presentation/widgets/auth_header.dart';
-import '../../../../../features/auth/presentation/widgets/loading_overlay.dart';
-import '../providers/auth_provider.dart';
-import '../../../../core/routes/app_router.dart';
+import 'package:merchandise48/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:merchandise48/features/auth/presentation/widgets/custom_button.dart';
+import 'package:merchandise48/features/auth/presentation/widgets/auth_header.dart';
+import 'package:merchandise48/features/auth/presentation/widgets/loading_overlay.dart';
+import 'package:merchandise48/features/auth/presentation/providers/auth_provider.dart';
+import 'package:merchandise48/core/routes/app_router.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

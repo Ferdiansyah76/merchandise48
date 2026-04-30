@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-
-import '../../../../core/services/dio_client.dart';
-import '../../../../core/constants/api_constants.dart';
-import '../../data/models/product_model.dart';
+import 'package:merchandise48/core/services/dio_client.dart';
+import 'package:merchandise48/core/constants/api_constants.dart';
+import 'package:merchandise48/features/dashboard/data/models/product_model.dart';
 
 enum ProductStatus { initial, loading, loaded, error }
 
