@@ -16,7 +16,10 @@ enum AuthStatus {
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: "497918096590-1nok3qn97fvjj2ga4227rhc0q1vlpctu.apps.googleusercontent.com",
+    scopes: ['email'],
+  );
 
   // ─── State ─────────────────────────────────────
   AuthStatus _status = AuthStatus.initial;
@@ -32,7 +35,7 @@ class AuthProvider extends ChangeNotifier {
   User? get firebaseUser => _firebaseUser;
   String? get backendToken => _backendToken;
   String? get errorMessage => _errorMessage;
-  bool get isLoading => _status == AuthStatus.loading; 
+  bool get isLoading => _status == AuthStatus.loading;
 
   // Register
   Future<bool> register({
@@ -61,7 +64,7 @@ class AuthProvider extends ChangeNotifier {
       return true;
   }
 
- // Verify email
+  // Verify email
   Future<bool> loginAfterEmailVerification() async {
     _setLoading();
 
@@ -87,96 +90,122 @@ class AuthProvider extends ChangeNotifier {
     return await _verifyTokenToBackend();
   }
 
-    // Verify Token ke Backend
+  // Verify Token ke Backend
   Future<bool> _verifyTokenToBackend() async {
-      final firebaseToken =
-          await _firebaseUser?.getIdToken();
+  try {
+    print("STEP 1 - ambil firebase token");
 
-      final response = await DioClient.instance.post(
-        ApiConstants.verifyToken,
-        data: {'firebase_token': firebaseToken},
-      );
+    final firebaseToken =
+        await _firebaseUser?.getIdToken();
 
-      final data =
-          response.data['data'] as Map<String, dynamic>;
+    print("TOKEN: $firebaseToken");
 
-      final backendToken =
-          data['access_token'] as String;
+    print("STEP 2 - kirim ke backend");
 
-      await SecureStorageService.saveToken(
-          backendToken);
+    final response = await DioClient.instance.post(
+      ApiConstants.verifyToken,
+      data: {'firebase_token': firebaseToken},
+    );
 
-      _backendToken = backendToken;
+    print("STEP 3 - response backend");
+    print(response.data);
 
-      _status = AuthStatus.authenticated;
+    final data =
+        response.data['data'] as Map<String, dynamic>;
+
+    final backendToken =
+        data['access_token'] as String;
+
+    await SecureStorageService.saveToken(
+        backendToken);
+
+    _backendToken = backendToken;
+
+    _status = AuthStatus.authenticated;
+    notifyListeners();
+
+    return true;
+  } catch (e) {
+    print("ERROR VERIFY TOKEN:");
+    print(e);
+
+    _setError("Gagal verifikasi backend");
+    return false;
+  }
+}
+
+//Login dengan email
+Future<bool> loginWithEmail({
+  required String email,
+  required String password,
+}) async {
+  _setLoading();
+  try {
+    final credential =
+        await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    _firebaseUser = credential.user;
+
+    if (!(_firebaseUser?.emailVerified ?? false)) {
+      _status = AuthStatus.emailNotVerified;
       notifyListeners();
-
-      return true;
-    }
-
-   //Login dengan email
-  Future<bool> loginWithEmail({
-    required String email,
-    required String password,
-  }) async {
-    _setLoading();
-    try {
-      final credential =
-          await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      _firebaseUser = credential.user;
-
-      if (!(_firebaseUser?.emailVerified ?? false)) {
-        _status = AuthStatus.emailNotVerified;
-        notifyListeners();
-        return false;
-      }
-
-      return await _verifyTokenToBackend();
-    } on FirebaseAuthException catch (e) {
-      _setError(_mapFirebaseError(e.code));
       return false;
     }
-  }
 
-    //Login dengan Google
+    return await _verifyTokenToBackend();
+  } on FirebaseAuthException catch (e) {
+    _setError(_mapFirebaseError(e.code));
+    return false;
+  } catch (e) {
+    _setError("Login gagal");
+    return false;
+  }
+}
+
+  //Login dengan Google
   Future<bool> loginWithGoogle() async {
     _setLoading();
+
     try {
-      final googleUser =
-          await _googleSignIn.signIn();
+      /// STEP 1: pilih akun google
+      final googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         _setError('Login Google dibatalkan');
         return false;
       }
 
-      final googleAuth =
-          await googleUser.authentication;
+      /// STEP 2: ambil auth data
+      final googleAuth = await googleUser.authentication;
 
-      final credential =
-          GoogleAuthProvider.credential(
+      /// STEP 3: convert ke firebase credential
+      final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final userCred =
-          await _auth.signInWithCredential(
-              credential);
+      /// STEP 4: login ke firebase
+      final userCredential =
+          await _auth.signInWithCredential(credential);
 
-      _firebaseUser = userCred.user;
+      _firebaseUser = userCredential.user;
 
+      /// STEP 5: kirim ke backend
       return await _verifyTokenToBackend();
+
     } catch (e) {
+      print("GOOGLE LOGIN ERROR: $e");
       _setError('Gagal login dengan Google');
       return false;
     }
   }
 
-    //Resend email verifikasi
+  
+  
+  //Resend email verifikasi
   Future<void> resendVerificationEmail() async {
     await _firebaseUser?.sendEmailVerification();
   }
@@ -188,11 +217,10 @@ class AuthProvider extends ChangeNotifier {
     if (_firebaseUser?.emailVerified ?? false) {
       return await _verifyTokenToBackend();
     }
-
     return false;
   }
 
-    //Logout & Clear Session
+  //Logout & Clear Session
   Future<void> logout() async {
     await _auth.signOut();
     await _googleSignIn.signOut();

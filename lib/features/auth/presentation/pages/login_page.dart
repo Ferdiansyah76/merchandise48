@@ -8,7 +8,8 @@ import 'package:merchandise48/features/auth/presentation/widgets/google_sign_in_
 import 'package:merchandise48/features/auth/presentation/widgets/loading_overlay.dart';
 import 'package:merchandise48/features/auth/presentation/widgets/auth_header.dart';
 import 'package:merchandise48/features/auth/presentation/widgets/divider_with_text.dart';
-import 'package:merchandise48/features/auth/presentation/providers/auth_provider.dart';
+import 'package:merchandise48/features/auth/presentation/providers/auth_provider.dart'    
+    as auth;
 import 'package:merchandise48/core/routes/app_router.dart';
 
 class LoginPage extends StatefulWidget {
@@ -34,30 +35,34 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _loginEmail() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final auth = context.read<AuthProvider>();
-    final ok = await auth.loginWithEmail(
+    final authProvider = context.read<auth.AuthProvider>();
+
+    final ok = await authProvider.loginWithEmail(
       email: _emailCtrl.text.trim(),
       password: _passCtrl.text,
     );
 
     if (!mounted) return;
-    _handleLoginResult(ok, auth);
+    _handleLoginResult(ok, authProvider);
   }
 
   Future<void> _loginGoogle() async {
-    final auth = context.read<AuthProvider>();
-    final ok = await auth.loginWithGoogle();
+    final authProvider = context.read<auth.AuthProvider>();
+
+    final ok = await authProvider.loginWithGoogle();
+
     if (!mounted) return;
-    _handleLoginResult(ok, auth);
+    _handleLoginResult(ok, authProvider);
   }
 
-  void _handleLoginResult(bool ok, AuthProvider auth) {
+  void _handleLoginResult(bool ok, auth.AuthProvider authProvider) {
     if (ok) {
       Navigator.pushReplacementNamed(
         context,
         AppRouter.dashboard,
       );
-    } else if (auth.status == AuthStatus.emailNotVerified) {
+    } else if (authProvider.status ==
+        auth.AuthStatus.emailNotVerified) {
       Navigator.pushReplacementNamed(
         context,
         AppRouter.verifyEmail,
@@ -65,7 +70,8 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage ?? 'Login gagal'),
+          content:
+              Text(authProvider.errorMessage ?? 'Login gagal'),
           backgroundColor: Colors.red,
         ),
       );
@@ -111,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isLoading =
-        context.watch<AuthProvider>().isLoading;
+        context.watch<auth.AuthProvider>().isLoading;
 
     return LoadingOverlay(
       isLoading: isLoading,
