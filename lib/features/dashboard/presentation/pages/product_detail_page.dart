@@ -15,25 +15,29 @@ class ProductDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Detail Product"),
       ),
-      body: Column(
-        children: [
+      /// 🔥 BODY SCROLLABLE (FIX OVERFLOW)
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
 
-          /// IMAGE
-          AspectRatio(
-            aspectRatio: 1,
-            child: Image.network(
-              product.imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.grey.shade200,
-                child: const Icon(
-                  Icons.local_bar,
-                  size: 80,
+            /// IMAGE
+            AspectRatio(
+              aspectRatio: 1,
+              child: Image.network(
+                product.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (_, __, ___) => Container(
+                  color: Colors.grey.shade200,
+                  child: const Icon(
+                    Icons.local_bar,
+                    size: 80,
+                  ),
                 ),
               ),
             ),
-          ),
+          
 
           /// CONTENT
           Expanded(

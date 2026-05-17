@@ -11,6 +11,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  String _query = '';
+
   @override
   void initState() {
     super.initState();
@@ -21,7 +23,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final product = context.watch<ProductProvider>();
+    final productProvider = context.watch<ProductProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -30,7 +32,7 @@ class _DashboardPageState extends State<DashboardPage> {
         centerTitle: true,
       ),
 
-      body: switch (product.status) {
+      body: switch (productProvider.status) {
 
         ProductStatus.loading || ProductStatus.initial =>
           const Center(child: CircularProgressIndicator()),
@@ -39,10 +41,10 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(product.error ?? 'Error'),
+              Text(productProvider.error ?? 'Error'),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: () => product.fetchProducts(),
+                onPressed: () => productProvider.fetchProducts(),
                 child: const Text('Coba Lagi'),
               ),
             ],
@@ -50,27 +52,51 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
 
         ProductStatus.loaded => RefreshIndicator(
-          onRefresh: () => product.fetchProducts(),
+          onRefresh: () => productProvider.fetchProducts(),
           child: Column(
             children: [
 
-              /// HEADER
-              const _HeaderSection(),
+              /// Header + Search
+              _HeaderSection(
+                onSearch: (value) {
+                  setState(() {
+                    _query = value.toLowerCase();
+                  });
+                },
+              ),
 
-              /// GRID PRODUCT
+              /// Filter Data
               Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: product.products.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: .72,
-                  ),
-                  itemBuilder: (_, i) =>
-                      _ProductCard(product: product.products[i]),
+                child: Builder(
+                  builder: (_) {
+                    final filteredProducts =
+                        productProvider.products.where((p) {
+                      return p.name
+                          .toLowerCase()
+                          .contains(_query);
+                    }).toList();
+
+                    if (filteredProducts.isEmpty) {
+                      return const Center(
+                        child: Text("Produk tidak ditemukan"),
+                      );
+                    }
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filteredProducts.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: .72,
+                      ),
+                      itemBuilder: (_, i) => _ProductCard(
+                        product: filteredProducts[i],
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

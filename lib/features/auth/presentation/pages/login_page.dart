@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     _passCtrl.dispose();
     super.dispose();
   }
-
+  /// Email Login
   Future<void> _loginEmail() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     _handleLoginResult(ok, authProvider);
   }
-
+  /// Google Login
   Future<void> _loginGoogle() async {
     final authProvider = context.read<auth.AuthProvider>();
 
@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
     _handleLoginResult(ok, authProvider);
   }
-
+  /// Handle Result
   void _handleLoginResult(bool ok, auth.AuthProvider authProvider) {
     if (ok) {
       Navigator.pushReplacementNamed(
@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
+  /// ForGot Password
   void _showForgotPasswordDialog(BuildContext context) {
     final ctrl = TextEditingController();
 
@@ -105,6 +105,11 @@ class _LoginPageState extends State<LoginPage> {
 
               if (context.mounted) {
                 Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Link reset password dikirim'),
+                  ),
+                );
               }
             },
             child: const Text('Kirim'),
@@ -116,8 +121,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading =
-        context.watch<auth.AuthProvider>().isLoading;
+    final isLoading = context.watch<auth.AuthProvider>().isLoading;
 
     return LoadingOverlay(
       isLoading: isLoading,
@@ -141,6 +145,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 32),
 
+                  /// Email
                   CustomTextField(
                     label: 'Email',
                     hint: 'contoh@email.com',
@@ -162,6 +167,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 16),
 
+                  /// Password
                   CustomTextField(
                     label: 'Password',
                     hint: 'Masukkan password',
@@ -186,6 +192,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 8),
 
+                  ///ForGot Password
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -199,6 +206,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 8),
 
+                  /// Login Button
                   CustomButton(
                     label: 'Masuk',
                     onPressed: _loginEmail,
@@ -212,6 +220,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 20),
 
+                  /// Google Button
                   GoogleSignInButton(
                     onPressed: _loginGoogle,
                     isLoading: isLoading,
@@ -219,6 +228,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 24),
 
+                  /// Register
                   Row(
                     mainAxisAlignment:
                         MainAxisAlignment.center,
