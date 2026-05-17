@@ -32,14 +32,7 @@ class AuthProvider extends ChangeNotifier {
   User? get firebaseUser => _firebaseUser;
   String? get backendToken => _backendToken;
   String? get errorMessage => _errorMessage;
-  bool get isLoading => _status == AuthStatus.loading;
-
-  // ─── Getters ───────────────────────────────────
-  AuthStatus get status => _status;
-  User? get firebaseUser => _firebaseUser;
-  String? get backendToken => _backendToken;
-  String? get errorMessage => _errorMessage;
-  bool get isLoading => _status == AuthStatus.loading;
+  bool get isLoading => _status == AuthStatus.loading; 
 
   // Register
   Future<bool> register({

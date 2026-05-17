@@ -21,9 +21,9 @@ class _SplashPageState extends State<SplashPage> {
     Future<void> _checkAuth() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
-
     final token = await SecureStorageService.getToken();
+
+    if (!mounted) return;
 
     final route =
         token != null ? AppRouter.dashboard : AppRouter.login;
